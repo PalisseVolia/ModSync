@@ -1,10 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import scrolledtext
 import os
 import json
 import webbrowser
 import os
 import shutil
+import requests
 
 TESTworshopPath = 'E:/steam/steamapps/workshop/content/294100'
 TESTjsonPath = 'mod_names.json'
@@ -78,6 +80,23 @@ def copy_folder_content(source_folder, destination_folder):
 # Run example
 # copy_folder_content("C:/Users/vpali/Desktop/ExampleConfig", "C:/Users/vpali/Desktop/testSync - Copie")
 
+# Function to fetch mod names from Steam API
+def get_mod_name(mod_id):
+    url = "https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/"
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    payload = {"itemcount": "1", "publishedfileids[0]": str(mod_id)}
+    
+    try:
+        response = requests.post(url, headers=headers, data=payload)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("response", {}).get("result", 0) == 1:
+                return data["response"]["publishedfiledetails"][0]["title"]
+    except Exception as e:
+        print(f"Error fetching mod details: {e}")
+    
+    return f"Mod ID {mod_id}"
+
 # ====================================================================================================================================================================
 # Main functions
 # ====================================================================================================================================================================
@@ -123,8 +142,6 @@ def Sync(SyncFolderPath, WorkshopFolderPath, ConfigFolderPath, ModlistsFolderPat
     copy_folder_content(os.path.join(SyncFolderPath, 'modlist'), ModlistsFolderPath)
     
     return True
-# Run example
-# TODO: Test Sync function
 
 
 # ====================================================================================================================================================================
@@ -274,6 +291,7 @@ def open_SyncFile_window():
         SyncFile_window.destroy()
         root.attributes("-disabled", False)
     SyncFile_window.protocol("WM_DELETE_WINDOW", close_sub_window)
+
 # ==========================================
 # Functions for Importing a sync folder
 # ==========================================
@@ -289,6 +307,25 @@ def open_Import_window(*args):
     Folder_entry = tk.Entry(Import_window)
     Folder_label.pack()
     Folder_entry.pack()
+    
+    # Function to create the sync folder, checking if the paths are valid beforehand
+    def Sync_file():
+        if os.path.exists(Workshop_entry.get()) and os.path.exists(Config_entry.get()) and os.path.exists(Modlist_entry.get()):
+            Status = Sync(Folder_entry.get(), Workshop_entry.get(), Config_entry.get(), Modlist_entry.get())
+            if Status == True:
+                root.attributes("-disabled", False)
+                Import_window.destroy()
+            else:
+                root.attributes("-disabled", False)
+                Import_window.destroy()
+                open_ModMismatch_window(Status[1], Status[2])
+        else:
+            if not os.path.exists(Workshop_entry.get()):
+                Workshop_label.config(text="Workshop folder path: does not exist")
+            if not os.path.exists(Config_entry.get()):
+                Config_label.config(text="Config folder path: does not exist")
+            if not os.path.exists(Modlist_entry.get()):
+                Modlist_label.config(text="ModLists folder path: does not exist")
     
     # If Auto_Pathing is enabled, the paths are automatically found
     if Auto_Pathing.get():
@@ -326,33 +363,25 @@ def open_Import_window(*args):
         else:
             Modlist_entry = tk.Entry(Import_window)
             Modlist_entry.insert(0, ModlistsFolderPath)
-        
-        # Function to create the sync folder, checking if the paths are valid beforehand
-        def Sync_file():
-            if os.path.exists(Workshop_entry.get()) and os.path.exists(Config_entry.get()) and os.path.exists(Modlist_entry.get()):
-                Status = Sync(Folder_entry.get(), Workshop_entry.get(), Config_entry.get(), Modlist_entry.get())
-                if Status == True:
-                    root.attributes("-disabled", False)
-                    Import_window.destroy()
-                else:
-                    root.attributes("-disabled", False)
-                    Import_window.destroy()
-                    open_ModMismatch_window(Status[1], Status[2])
-            else:
-                if not os.path.exists(Workshop_entry.get()):
-                    Workshop_label.config(text="Workshop folder path: does not exist")
-                if not os.path.exists(Config_entry.get()):
-                    Config_label.config(text="Config folder path: does not exist")
-                if not os.path.exists(Modlist_entry.get()):
-                    Modlist_label.config(text="ModLists folder path: does not exist")
-
-        Sync_button = tk.Button(Import_window, text="Create Sync File", command=Sync_file)
-        Sync_button.pack()
-            
+    # If Auto_Pathing is disabled, the user needs to input the paths
     else:
-        # TODO: Manual pathing
-        pass
-    
+        Workshop_label = tk.Label(Import_window, text="Workshop folder path")
+        Workshop_entry = tk.Entry(Import_window)
+        Workshop_label.pack()
+        Workshop_entry.pack()
+        
+        Config_label = tk.Label(Import_window, text="Config folder path")
+        Config_entry = tk.Entry(Import_window)
+        Config_label.pack()
+        Config_entry.pack()
+        
+        Modlist_label = tk.Label(Import_window, text="ModLists folder path")
+        Modlist_entry = tk.Entry(Import_window)
+        Modlist_label.pack()
+        Modlist_entry.pack()
+
+    Sync_button = tk.Button(Import_window, text="Sync", command=Sync_file)
+    Sync_button.pack()
     
     def close_sub_window():
         Import_window.destroy()
@@ -367,26 +396,43 @@ def open_ModMismatch_window(ModsToAdd, ModsToRemove):
     root.attributes("-disabled", True)
     ModMismatch_window = tk.Toplevel(root)
     ModMismatch_window.title("Choose sync folder parameters")
-    ModMismatch_window.geometry("500x200")
+    ModMismatch_window.geometry("500x400")
     
     def call_Modpage_Add():
         OpenModpage(ModsToAdd)
+        
     def call_Modpage_Remove():
         OpenModpage(ModsToRemove)
     
-    # TODO: better display + names of mods
-    add_label = tk.Label(ModMismatch_window, text="Mods to add : " + str(ModsToAdd))
+    add_label = tk.Label(ModMismatch_window, text="Mods to add:")
     add_label.pack()
-    Link_Add_button = tk.Button(ModMismatch_window, text="Open Modpage", command=call_Modpage_Add)
+    
+    add_scroll = scrolledtext.ScrolledText(ModMismatch_window, width=40, height=5)
+    add_scroll.pack()
+    for mod in ModsToAdd:
+        add_scroll.insert(tk.END, get_mod_name(mod) + '\n')
+    add_scroll.configure(state='disabled')  # Disable editing
+
+    
+    Link_Add_button = tk.Button(ModMismatch_window, text="Open Modpage (Add)", command=call_Modpage_Add)
     Link_Add_button.pack()
-    remove_label = tk.Label(ModMismatch_window, text="Mods to remove : " + str(ModsToRemove))
+    
+    remove_label = tk.Label(ModMismatch_window, text="Mods to remove:")
     remove_label.pack()
-    Link_Remove_button = tk.Button(ModMismatch_window, text="Open Modpage", command=call_Modpage_Remove)
+    
+    remove_scroll = scrolledtext.ScrolledText(ModMismatch_window, width=40, height=5)
+    remove_scroll.pack()
+    for mod in ModsToRemove:
+        remove_scroll.insert(tk.END, get_mod_name(mod) + '\n')
+    remove_scroll.configure(state='disabled')  # Disable editing
+    
+    Link_Remove_button = tk.Button(ModMismatch_window, text="Open Modpage (Remove)", command=call_Modpage_Remove)
     Link_Remove_button.pack()
     
     def close_sub_window():
         ModMismatch_window.destroy()
         root.attributes("-disabled", False)
+        
     ModMismatch_window.protocol("WM_DELETE_WINDOW", close_sub_window)
 
 # ==========================================
