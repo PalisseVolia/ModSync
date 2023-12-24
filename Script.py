@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import scrolledtext
+from ttkthemes import ThemedTk
 import os
 import json
 import webbrowser
@@ -154,6 +155,7 @@ def Sync(SyncFolderPath, WorkshopFolderPath, ConfigFolderPath, ModlistsFolderPat
 
 # Create the interface
 root = tk.Tk()
+root.title("Rimworld Mod Sync")
 
 # Get screen dimensions
 screen_width = root.winfo_screenwidth()
@@ -170,6 +172,18 @@ def close_sub_window():
     root.destroy()
 root.protocol("WM_DELETE_WINDOW", close_sub_window)
 
+style = ttk.Style()
+
+style.configure("TButton",
+                font=("Arial", 14),  # Increased font size for buttons
+                padding=10)
+
+style.configure("TLabel",
+                font=("Arial", 14))  # Increased font size for labels
+
+style.configure("TCheckbutton",
+                font=("Arial", 14))  # Increased font size for check buttons
+
 # ==========================================
 # Functions for Creating a sync folder
 # ==========================================
@@ -179,45 +193,49 @@ def open_SyncFileAuto_window():
     root.attributes("-disabled", True)
     SyncFileAuto_window = tk.Toplevel(root)
     SyncFileAuto_window.title("Choose sync folder parameters")
-    SyncFileAuto_window.geometry("500x200")
-    name_label = tk.Label(SyncFileAuto_window, text="Folder Name")
-    name_entry = tk.Entry(SyncFileAuto_window)
-    name_label.pack()
-    name_entry.pack()
+    size = 100;
+    
+    name_label = ttk.Label(SyncFileAuto_window, text="Folder Name")
+    name_entry = ttk.Entry(SyncFileAuto_window)
+    name_label.pack(fill=tk.BOTH, expand=True)
+    name_entry.pack(fill=tk.BOTH, expand=True)
     
     # Check workshop folder automatically or deflauts to manual input
     WorkshopFolderPath = check_directory_exists('/steam/steamapps/workshop/content/294100')
     if WorkshopFolderPath == 'none':
-        Workshop_label = tk.Label(SyncFileAuto_window, text="Workshop folder path")
-        Workshop_entry = tk.Entry(SyncFileAuto_window)
-        Workshop_label.pack()
-        Workshop_entry.pack()
+        Workshop_label = ttk.Label(SyncFileAuto_window, text="Workshop folder path")
+        Workshop_entry = ttk.Entry(SyncFileAuto_window)
+        Workshop_label.pack(fill=tk.BOTH, expand=True)
+        Workshop_entry.pack(fill=tk.BOTH, expand=True)
+        size = size + 75
     else:
-        Workshop_entry = tk.Entry(SyncFileAuto_window)
+        Workshop_entry = ttk.Entry(SyncFileAuto_window)
         Workshop_entry.insert(0, WorkshopFolderPath)
         
     # Check config folder automatically or deflauts to manual input
     user_profile = os.environ.get('USERPROFILE')
     ConfigFolderPath = os.path.join(user_profile, 'AppData', 'LocalLow', 'Ludeon Studios', 'RimWorld by Ludeon Studios', 'Config')
     if os.path.exists(ConfigFolderPath) == False:
-        Config_label = tk.Label(SyncFileAuto_window, text="Config folder path")
-        Config_entry = tk.Entry(SyncFileAuto_window)
-        Config_label.pack()
-        Config_entry.pack()
+        Config_label = ttk.Label(SyncFileAuto_window, text="Config folder path")
+        Config_entry = ttk.Entry(SyncFileAuto_window)
+        Config_label.pack(fill=tk.BOTH, expand=True)
+        Config_entry.pack(fill=tk.BOTH, expand=True)
+        size = size + 75
     else:
-        Config_entry = tk.Entry(SyncFileAuto_window)
+        Config_entry = ttk.Entry(SyncFileAuto_window)
         Config_entry.insert(0, ConfigFolderPath)
     
     # Check modlist folder automatically or deflauts to manual input
     user_profile = os.environ.get('USERPROFILE')
     ModlistsFolderPath = os.path.join(user_profile, 'AppData', 'LocalLow', 'Ludeon Studios', 'RimWorld by Ludeon Studios', 'ModLists')
     if os.path.exists(ModlistsFolderPath) == False:
-        Modlist_label = tk.Label(SyncFileAuto_window, text="ModLists folder path")
-        Modlist_entry = tk.Entry(SyncFileAuto_window)
-        Modlist_label.pack()
-        Modlist_entry.pack()
+        Modlist_label = ttk.Label(SyncFileAuto_window, text="ModLists folder path")
+        Modlist_entry = ttk.Entry(SyncFileAuto_window)
+        Modlist_label.pack(fill=tk.BOTH, expand=True)
+        Modlist_entry.pack(fill=tk.BOTH, expand=True)
+        size = size + 75
     else:
-        Modlist_entry = tk.Entry(SyncFileAuto_window)
+        Modlist_entry = ttk.Entry(SyncFileAuto_window)
         Modlist_entry.insert(0, ModlistsFolderPath)
 
     # Function to create the sync folder, checking if the paths are valid beforehand
@@ -234,8 +252,10 @@ def open_SyncFileAuto_window():
             if not os.path.exists(Modlist_entry.get()):
                 Modlist_label.config(text="ModLists folder path: does not exist")
 
-    create_sync_button = tk.Button(SyncFileAuto_window, text="Create Sync File", command=create_sync_file)
-    create_sync_button.pack()
+    SyncFileAuto_window.geometry("500x" + str(size))
+    
+    create_sync_button = ttk.Button(SyncFileAuto_window, text="Create Sync File", command=create_sync_file)
+    create_sync_button.pack(fill=tk.BOTH, expand=True)
     
     # Function to call when window closed
     def close_sub_window():
@@ -248,26 +268,27 @@ def open_SyncFile_window():
     root.attributes("-disabled", True)
     SyncFile_window = tk.Toplevel(root)
     SyncFile_window.title("Choose sync folder parameters")
-    SyncFile_window.geometry("500x200")
-    name_label = tk.Label(SyncFile_window, text="Folder Name")
-    name_entry = tk.Entry(SyncFile_window)
-    name_label.pack()
-    name_entry.pack()
+    SyncFile_window.geometry("500x325")
     
-    Workshop_label = tk.Label(SyncFile_window, text="Workshop folder path")
-    Workshop_entry = tk.Entry(SyncFile_window)
-    Workshop_label.pack()
-    Workshop_entry.pack()
+    name_label = ttk.Label(SyncFile_window, text="Folder Name")
+    name_entry = ttk.Entry(SyncFile_window)
+    name_label.pack(fill=tk.BOTH, expand=True)
+    name_entry.pack(fill=tk.BOTH, expand=True)
     
-    Config_label = tk.Label(SyncFile_window, text="Config folder path")
-    Config_entry = tk.Entry(SyncFile_window)
-    Config_label.pack()
-    Config_entry.pack()
+    Workshop_label = ttk.Label(SyncFile_window, text="Workshop folder path")
+    Workshop_entry = ttk.Entry(SyncFile_window)
+    Workshop_label.pack(fill=tk.BOTH, expand=True)
+    Workshop_entry.pack(fill=tk.BOTH, expand=True)
     
-    Modlist_label = tk.Label(SyncFile_window, text="ModLists folder path")
-    Modlist_entry = tk.Entry(SyncFile_window)
-    Modlist_label.pack()
-    Modlist_entry.pack()
+    Config_label = ttk.Label(SyncFile_window, text="Config folder path")
+    Config_entry = ttk.Entry(SyncFile_window)
+    Config_label.pack(fill=tk.BOTH, expand=True)
+    Config_entry.pack(fill=tk.BOTH, expand=True)
+    
+    Modlist_label = ttk.Label(SyncFile_window, text="ModLists folder path")
+    Modlist_entry = ttk.Entry(SyncFile_window)
+    Modlist_label.pack(fill=tk.BOTH, expand=True)
+    Modlist_entry.pack(fill=tk.BOTH, expand=True)
     
     # Function to create the sync folder, checking if the paths are valid beforehand
     def create_sync_file():
@@ -283,8 +304,8 @@ def open_SyncFile_window():
             if not os.path.exists(Modlist_entry.get()):
                 Modlist_label.config(text="ModLists folder path: does not exist")
 
-    create_sync_button = tk.Button(SyncFile_window, text="Create Sync File", command=create_sync_file)
-    create_sync_button.pack()
+    create_sync_button = ttk.Button(SyncFile_window, text="Create Sync File", command=create_sync_file)
+    create_sync_button.pack(fill=tk.BOTH, expand=True)
     
     # Function to call when window closed
     def close_sub_window():
@@ -300,13 +321,13 @@ def open_Import_window(*args):
     root.attributes("-disabled", True)
     Import_window = tk.Toplevel(root)
     Import_window.title("Choose sync folder parameters")
-    Import_window.geometry("500x200")
+    size = 100
     
     # User needs to input the path of the sync folder
-    Folder_label = tk.Label(Import_window, text="Folder Path")
-    Folder_entry = tk.Entry(Import_window)
-    Folder_label.pack()
-    Folder_entry.pack()
+    Folder_label = ttk.Label(Import_window, text="Folder Path")
+    Folder_entry = ttk.Entry(Import_window)
+    Folder_label.pack(fill=tk.BOTH, expand=True)
+    Folder_entry.pack(fill=tk.BOTH, expand=True)
     
     # Function to create the sync folder, checking if the paths are valid beforehand
     def Sync_file():
@@ -332,56 +353,62 @@ def open_Import_window(*args):
         # Check workshop folder automatically or deflauts to manual input
         WorkshopFolderPath = check_directory_exists('/steam/steamapps/workshop/content/294100')
         if WorkshopFolderPath == 'none':
-            Workshop_label = tk.Label(Import_window, text="Workshop folder path")
-            Workshop_entry = tk.Entry(Import_window)
-            Workshop_label.pack()
-            Workshop_entry.pack()
+            Workshop_label = ttk.Label(Import_window, text="Workshop folder path")
+            Workshop_entry = ttk.Entry(Import_window)
+            Workshop_label.pack(fill=tk.BOTH, expand=True)
+            Workshop_entry.pack(fill=tk.BOTH, expand=True)
+            size = size + 75
         else:
-            Workshop_entry = tk.Entry(Import_window)
+            Workshop_entry = ttk.Entry(Import_window)
             Workshop_entry.insert(0, WorkshopFolderPath)
             
         # Check config folder automatically or deflauts to manual input
         user_profile = os.environ.get('USERPROFILE')
         ConfigFolderPath = os.path.join(user_profile, 'AppData', 'LocalLow', 'Ludeon Studios', 'RimWorld by Ludeon Studios', 'Config')
         if os.path.exists(ConfigFolderPath) == False:
-            Config_label = tk.Label(Import_window, text="Config folder path")
-            Config_entry = tk.Entry(Import_window)
-            Config_label.pack()
-            Config_entry.pack()
+            Config_label = ttk.Label(Import_window, text="Config folder path")
+            Config_entry = ttk.Entry(Import_window)
+            Config_label.pack(fill=tk.BOTH, expand=True)
+            Config_entry.pack(fill=tk.BOTH, expand=True)
+            size = size + 75
         else:
-            Config_entry = tk.Entry(Import_window)
+            Config_entry = ttk.Entry(Import_window)
             Config_entry.insert(0, ConfigFolderPath)
             
         # Check modlist folder automatically or deflauts to manual input
         user_profile = os.environ.get('USERPROFILE')
         ModlistsFolderPath = os.path.join(user_profile, 'AppData', 'LocalLow', 'Ludeon Studios', 'RimWorld by Ludeon Studios', 'ModLists')
         if os.path.exists(ModlistsFolderPath) == False:
-            Modlist_label = tk.Label(Import_window, text="ModLists folder path")
-            Modlist_entry = tk.Entry(Import_window)
-            Modlist_label.pack()
-            Modlist_entry.pack()
+            Modlist_label = ttk.Label(Import_window, text="ModLists folder path")
+            Modlist_entry = ttk.Entry(Import_window)
+            Modlist_label.pack(fill=tk.BOTH, expand=True)
+            Modlist_entry.pack(fill=tk.BOTH, expand=True)
+            size = size + 75
         else:
-            Modlist_entry = tk.Entry(Import_window)
+            Modlist_entry = ttk.Entry(Import_window)
             Modlist_entry.insert(0, ModlistsFolderPath)
     # If Auto_Pathing is disabled, the user needs to input the paths
     else:
-        Workshop_label = tk.Label(Import_window, text="Workshop folder path")
-        Workshop_entry = tk.Entry(Import_window)
-        Workshop_label.pack()
-        Workshop_entry.pack()
+        Workshop_label = ttk.Label(Import_window, text="Workshop folder path")
+        Workshop_entry = ttk.Entry(Import_window)
+        Workshop_label.pack(fill=tk.BOTH, expand=True)
+        Workshop_entry.pack(fill=tk.BOTH, expand=True)
         
-        Config_label = tk.Label(Import_window, text="Config folder path")
-        Config_entry = tk.Entry(Import_window)
-        Config_label.pack()
-        Config_entry.pack()
+        Config_label = ttk.Label(Import_window, text="Config folder path")
+        Config_entry = ttk.Entry(Import_window)
+        Config_label.pack(fill=tk.BOTH, expand=True)
+        Config_entry.pack(fill=tk.BOTH, expand=True)
         
-        Modlist_label = tk.Label(Import_window, text="ModLists folder path")
-        Modlist_entry = tk.Entry(Import_window)
-        Modlist_label.pack()
-        Modlist_entry.pack()
+        Modlist_label = ttk.Label(Import_window, text="ModLists folder path")
+        Modlist_entry = ttk.Entry(Import_window)
+        Modlist_label.pack(fill=tk.BOTH, expand=True)
+        Modlist_entry.pack(fill=tk.BOTH, expand=True)
+        size = size + 225
 
-    Sync_button = tk.Button(Import_window, text="Sync", command=Sync_file)
-    Sync_button.pack()
+    Import_window.geometry("500x" + str(size))
+    
+    Sync_button = ttk.Button(Import_window, text="Sync", command=Sync_file)
+    Sync_button.pack(fill=tk.BOTH, expand=True)
     
     def close_sub_window():
         Import_window.destroy()
@@ -404,30 +431,30 @@ def open_ModMismatch_window(ModsToAdd, ModsToRemove):
     def call_Modpage_Remove():
         OpenModpage(ModsToRemove)
     
-    add_label = tk.Label(ModMismatch_window, text="Mods to add:")
-    add_label.pack()
+    add_label = ttk.Label(ModMismatch_window, text="Mods to add:")
+    add_label.pack(fill=tk.BOTH, expand=True)
     
     add_scroll = scrolledtext.ScrolledText(ModMismatch_window, width=40, height=5)
-    add_scroll.pack()
+    add_scroll.pack(fill=tk.BOTH, expand=True)
     for mod in ModsToAdd:
         add_scroll.insert(tk.END, get_mod_name(mod) + '\n')
     add_scroll.configure(state='disabled')  # Disable editing
 
     
-    Link_Add_button = tk.Button(ModMismatch_window, text="Open Modpage (Add)", command=call_Modpage_Add)
-    Link_Add_button.pack()
+    Link_Add_button = ttk.Button(ModMismatch_window, text="Open Modpage (Add)", command=call_Modpage_Add)
+    Link_Add_button.pack(fill=tk.BOTH, expand=True)
     
-    remove_label = tk.Label(ModMismatch_window, text="Mods to remove:")
-    remove_label.pack()
+    remove_label = ttk.Label(ModMismatch_window, text="Mods to remove:")
+    remove_label.pack(fill=tk.BOTH, expand=True)
     
     remove_scroll = scrolledtext.ScrolledText(ModMismatch_window, width=40, height=5)
-    remove_scroll.pack()
+    remove_scroll.pack(fill=tk.BOTH, expand=True)
     for mod in ModsToRemove:
         remove_scroll.insert(tk.END, get_mod_name(mod) + '\n')
     remove_scroll.configure(state='disabled')  # Disable editing
     
-    Link_Remove_button = tk.Button(ModMismatch_window, text="Open Modpage (Remove)", command=call_Modpage_Remove)
-    Link_Remove_button.pack()
+    Link_Remove_button = ttk.Button(ModMismatch_window, text="Open Modpage (Remove)", command=call_Modpage_Remove)
+    Link_Remove_button.pack(fill=tk.BOTH, expand=True)
     
     def close_sub_window():
         ModMismatch_window.destroy()
@@ -447,27 +474,26 @@ Auto_Pathing.set(True)
 def handle_visibility_change(*args):
     visibility = Auto_Pathing.get()
     if visibility:
-        Sync_button_auto.pack()
+        Sync_button_auto.pack(fill=tk.BOTH, expand=True)
         Sync_button_manual.pack_forget()
     else:
-        Sync_button_manual.pack()
+        Sync_button_manual.pack(fill=tk.BOTH, expand=True)
         Sync_button_auto.pack_forget()
 
 # Create the checkbox
-visibility_checkbox = tk.Checkbutton(root, text="Auto Pathing", variable=Auto_Pathing, onvalue=True, offvalue=False)
+visibility_checkbox = ttk.Checkbutton(root, text="Auto Pathing", variable=Auto_Pathing, onvalue=True, offvalue=False)
 visibility_checkbox.pack()
 
 # Call the handle_visibility_change function when the checkbox value changes
 Auto_Pathing.trace_add("write", handle_visibility_change)
 
 # Create the buttons
-Sync_button_auto = tk.Button(root, text="Generate Sync Folder", command=open_SyncFileAuto_window)
-Sync_button_manual = tk.Button(root, text="Generate Sync Folder", command=open_SyncFile_window)
-Sync_button_auto.pack()
+Import_button = ttk.Button(root, text="Import Sync Folder", command=open_Import_window)
+Import_button.pack(fill=tk.BOTH, expand=True)
 
-
-Import_button = tk.Button(root, text="Import Sync Folder", command=open_Import_window)
-Import_button.pack()
+Sync_button_auto = ttk.Button(root, text="Generate Sync Folder", command=open_SyncFileAuto_window)
+Sync_button_manual = ttk.Button(root, text="Generate Sync Folder", command=open_SyncFile_window)
+Sync_button_auto.pack(fill=tk.BOTH, expand=True)
 
 # Run the interface
 root.mainloop()
