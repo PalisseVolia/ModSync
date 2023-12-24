@@ -1,6 +1,6 @@
 # ModSync
 
-Python script : "Script.py" \n
+Python script : "Script.py"                 
 Executable : "dist/Script/Script.exe" (need whole dist folder to launch)
 
 # What does it do 
